@@ -17,8 +17,7 @@ To deploy these dotfiles on a new machine, follow these steps.
 First, clone this repository as a bare repository into a dedicated directory in your home folder. A common convention is `.myconf`.
 
 ```bash
-# Replace the URL with your repository's URL
-git clone --bare git@github.com:your-username/dotfiles.git $HOME/.myconf
+git clone --bare git@github.com:Jiyangson/dotfiles.git $HOME/.myconf
 ```
 
 ### 2. Define the `config` Alias
