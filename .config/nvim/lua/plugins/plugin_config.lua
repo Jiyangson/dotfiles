@@ -313,17 +313,6 @@ return {
       vim.g.gitblame_use_blame_commit_file_urls = true
     end,
   },
-  -- {
-  --   "nvim-treesitter/nvim-treesitter",
-  --   dependencies = { "HiPhish/nvim-ts-rainbow2" },
-  --   opts = function(_, opts)
-  --     opts.rainbow = {
-  --       enable = true,
-  --       query = "rainbow-parens",
-  --       strategy = require("ts-rainbow").strategy.global,
-  --     }
-  --   end,
-  -- },
   {
     "sustech-data/wildfire.nvim",
     event = "VeryLazy",
@@ -467,6 +456,91 @@ return {
   },
   {
     "sindrets/diffview.nvim",
+  },
+  {
+    "mfussenegger/nvim-dap-python",
+    -- stylua: ignore
+    keys = {
+      { "<leader>dPt", function() require('dap-python').test_method() end, desc = "Debug Method", ft = "python" },
+      { "<leader>dPc", function() require('dap-python').test_class() end, desc = "Debug Class", ft = "python" },
+    },
+    config = function()
+      -- if vim.fn.has("win32") == 1 then
+      --   require("dap-python").setup(LazyVim.get_pkg_path("debugpy", "/venv/Scripts/pythonw.exe"))
+      -- else
+      --   require("dap-python").setup(LazyVim.get_pkg_path("debugpy", "/venv/bin/python"))
+      -- end
+      require("dap-python").setup("/usr/bin/python")
+      local dap = require("dap")
+      dap.configurations.python = dap.configurations.python or {}
+    end,
+  },
+  {
+    "LiadOz/nvim-dap-repl-highlights",
+  },
+  {
+    "nvim-treesitter/nvim-treesitter",
+    config = function()
+      require("nvim-dap-repl-highlights").setup() -- must be setup before nvim-treesitter
+      require("nvim-treesitter.configs").setup({
+        highlight = {
+          enable = true,
+          disable = function(_, buf)
+            local max_filesize = 100 * 1024 -- 100 KB
+            local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+            if ok and stats and stats.size > max_filesize then
+              return true
+            end
+          end,
+        },
+        indent = {
+          enable = true,
+          disable = {},
+        },
+        ensure_installed = {
+          "bash",
+          "luadoc",
+          "json",
+          "markdown",
+          "regex",
+          "vim",
+          "vimdoc",
+          "lua",
+          "python",
+          "typescript",
+          "html",
+          "javascript",
+          "tsx",
+          "scss",
+          "rust",
+          "c",
+          "dap_repl",
+          "yaml",
+        },
+      })
+      vim.o.foldexpr = "nvim_treesitter#foldexpr()"
+    end,
+  },
+  {
+    "mfussenegger/nvim-dap",
+    keys = {
+      {
+        "<A-d>",
+        function()
+          local mode = vim.fn.mode()
+          local text
+          if mode == "v" or mode == "V" then
+            local lines = vim.fn.getregion(vim.fn.getpos("."), vim.fn.getpos("v"))
+            text = table.concat(lines, "\n")
+          else
+            text = vim.api.nvim_get_current_line()
+          end
+          require("dap").repl.execute(text)
+        end,
+        mode = { "n", "x" },
+        desc = "Evaluate line/selection in Debug REPL",
+      },
+    },
   },
 }
 
